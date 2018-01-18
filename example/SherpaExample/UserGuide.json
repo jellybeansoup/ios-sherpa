@@ -45,9 +45,21 @@
 				{
 					"key": "body",
 					"title": "Body Content",
-					"body": "The body of an article may be a string of any length, and can contain basic HTML markup (such as <code>&lt;a&gt;</code>, <code>&lt;strong&gt;</code> or <code>&lt;em&gt;</code>) which is converted for display when viewing the article.",
+                         "body": "The body of an article may be a string of any length, and can contain basic HTML markup (such as <code>&lt;a&gt;</code>, <code>&lt;strong&gt;</code> or <code>&lt;em&gt;</code>) which is converted for display when viewing the article.",
 					"related_articles": ["key", "article-title", "minimum-build", "maximum-build", "related-articles"]
 				},
+                 {
+                     "key": "html",
+                     "title": "HTML Content",
+                     "body": "The body of an article may be a string of any length, and optionally contain more complex HTML markup (such as <code>&lt;a&gt;</code>, <code>&lt;strong&gt;</code> or <code>&lt;em&gt;</code>) which is converted for display when viewing the article.<ul><li>One</li><li>Two</li></ul><br><img src='https://www.fillmurray.com/600/600.png' />",
+                     "related_articles": ["key", "article-title", "minimum-build", "maximum-build", "related-articles"]
+                 },
+                 {
+                         "key": "html",
+                         "title": "Full HTML Render",
+                         "html": "You can also explicitly add HTML content for rendering using the 'html' article element.<br /><div style='margin-left: 20px'><ol><li>You can add ordered lists</li><li>You can add un ordered lists</li><li>You can add externally loaded images :<img src='https://www.fillmurray.com/600/600.png'></a></li><li>You can add nested lists as well :</li></ol><ul><li>Add something here</li><li>Optionally add something here as well</li></ul><div>Add a footnote to empahize additional information.<br /><em>If you want to edit the style of individual elements, you can add that directly inline to the style tag of an element.</em></div>",
+                         "related_articles": ["key", "article-title", "minimum-build", "maximum-build", "related-articles"]
+                 },
 				{
 					"key": "minimum-build",
 					"title": "Build Numbers",

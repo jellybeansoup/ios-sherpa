@@ -31,6 +31,8 @@ internal struct Article {
 	let title: String
 	
 	let body: String
+    
+    let html: String
 	
 	let buildMin: Int
 	
@@ -83,7 +85,8 @@ internal struct Article {
 		// Title and body
 		title = dictionary["title"] as? String ?? ""
 		body = dictionary["body"] as? String ?? ""
-		if title.isEmpty || body.isEmpty {
+        html = dictionary["html"] as? String ?? ""
+		if title.isEmpty || ( body.isEmpty && html.isEmpty ) {
 			return nil
 		}
 	}

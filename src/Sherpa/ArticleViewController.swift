@@ -23,6 +23,7 @@
 //
 
 import UIKit
+import WebKit
 
 internal class ArticleViewController: ListViewController {
 	
@@ -52,6 +53,8 @@ internal class ArticleViewController: ListViewController {
 	internal let titleLabel: UILabel! = UILabel()
 	
 	internal let bodyView: UITextView! = UITextView()
+    
+    internal let htmlView: WKWebView! = WKWebView()
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -73,17 +76,26 @@ internal class ArticleViewController: ListViewController {
 		
 		self.titleLabel.text = self.article.title
 		
-		self.bodyView.backgroundColor = UIColor.clear
-		self.bodyView.isEditable = false
-		self.bodyView.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body)
-		self.bodyView.textColor = self.dataSource.document.articleTextColor
-		self.bodyView.tintColor = self.dataSource.document.tintColor
-		self.bodyView.translatesAutoresizingMaskIntoConstraints = false
-		self.bodyView.textContainer.lineFragmentPadding = 0
-		self.bodyView.textContainerInset = UIEdgeInsets.zero
-		self.contentView.addSubview(self.bodyView)
-		
-		self.bodyView.attributedText = self._applyAttributes(toString: self.article.body)
+        if self.article.html.count > 0 {
+            self.htmlView.isOpaque = false
+            self.htmlView.backgroundColor = UIColor.clear
+            self.htmlView.loadHTMLString(self._applyStyle(toString: self.article.html), baseURL: nil)
+            self.contentView.addSubview(self.htmlView)
+        }
+        else {
+            self.bodyView.backgroundColor = UIColor.clear
+            self.bodyView.isEditable = false
+            self.bodyView.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body)
+            self.bodyView.textColor = self.dataSource.document.articleTextColor
+            self.bodyView.tintColor = self.dataSource.document.tintColor
+            self.bodyView.translatesAutoresizingMaskIntoConstraints = false
+            self.bodyView.textContainer.lineFragmentPadding = 0
+            self.bodyView.textContainerInset = UIEdgeInsets.zero
+            self.contentView.addSubview(self.bodyView)
+            
+            self.bodyView.attributedText = self._applyAttributes(toString: self.article.body)
+        }
+        
 	}
 	
 	override func viewWillAppear(_ animated: Bool) {
@@ -100,11 +112,21 @@ internal class ArticleViewController: ListViewController {
 			
 			let maxSize = CGSize(width: width - margins.left - margins.right, height: CGFloat.greatestFiniteMagnitude)
 			let titleSize = self.titleLabel.sizeThatFits(maxSize)
-			let bodySize = self.bodyView.sizeThatFits(maxSize)
-			
 			self.titleLabel.frame = CGRect(x: margins.left, y: 30, width: maxSize.width, height: titleSize.height)
-			self.bodyView.frame = CGRect(x: margins.left, y: self.titleLabel.frame.maxY + 15, width: maxSize.width, height: bodySize.height)
-			header?.frame = CGRect(x: 0, y: 0, width: width, height: self.bodyView.frame.maxY)
+            
+            if self.article.html.count > 0 {
+                let htmlSize = self.tableView.frame.height * 0.6    // Fixed height
+                
+                self.htmlView.frame = CGRect(x: margins.left, y: self.titleLabel.frame.maxY + 15, width: maxSize.width, height: htmlSize)
+                header?.frame = CGRect(x: 0, y: 0, width: width, height: self.htmlView.frame.maxY)
+            }
+            else {
+                let bodySize = self.bodyView.sizeThatFits(maxSize)
+                
+                self.bodyView.frame = CGRect(x: margins.left, y: self.titleLabel.frame.maxY + 15, width: maxSize.width, height: bodySize.height)
+                header?.frame = CGRect(x: 0, y: 0, width: width, height: self.bodyView.frame.maxY)
+
+            }
 			
 			self.tableView.tableHeaderView = header
 		}
@@ -168,4 +190,12 @@ internal class ArticleViewController: ListViewController {
 		}
 	}
 	
+    fileprivate func _applyStyle(toString string: String) -> String {
+        
+        let styled = "<style>body{ font-family: 'HelveticaNeue', 'Arial', 'Serif'; font-size: 44px; background-color: #efeff4 }</style><body>\(string)</body>"
+        
+        return styled
+        
+        
+    }
 }
