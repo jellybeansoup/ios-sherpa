@@ -15,6 +15,32 @@ A drop-in solution for displaying a user guide in an iOS app, based on a JSON te
 - Built in feedback mechanisms for email and Twitter.
 - Customize colors, and optionally provide a `UITableViewCell` subclass to use.
 
+## Installation
+
+### [Swift Package Manager](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app) (for Apple platforms only)
+
+In Xcode, select _File_ > _Swift Packages_ > _Add Package Dependency_ and enter the repository URL:
+
+```
+https://github.com/jellybeansoup/ios-sherpa
+```
+
+### [CocoaPods](http://cocoapods.org/)
+
+Add the following line to your `Podfile`:
+
+```
+pod 'Sherpa'
+```
+
+### [Carthage](https://github.com/Carthage/Carthage)
+
+Add the following line to your `Podfile`:
+
+```
+github "jellybeansoup/ios-sherpa"
+```
+
 ## How to Use
 
 Sherpa uses a JSON file as the source of its content, which allows you to provide a file in your app bundle, download a file from a server, or both! It handles parsing of the JSON for you, all you need to do is give it the local URL to the document, and it will handle the rest. You don't even need to wrap the view controller in a `UINavigationController`, as this is done automatically; just present the `SherpaViewController` directly and you're good to go.
@@ -42,13 +68,11 @@ self.navigationController?.pushViewController(viewController, animated: true)
 
 More information about setting up the JSON document can be found within [the example application's UserGuide.json file](https://raw.githubusercontent.com/jellybeansoup/ios-sherpa/master/example/SherpaExample/UserGuide.json). You can read this user guide and see the examples in action by taking the example application itself for a spin. CocoaPods makes this easy with the `pod try Sherpa` command, which can be run from Terminal if you have CocoaPods installed.
 
-## Installation
+## Documentation
 
-CocoaPods
+You can [find documentation for this project here](https://jellybeansoup.github.io/ios-sherpa/). This documentation is automatically generated with [jazzy](https://github.com/realm/jazzy) from a [GitHub Action](https://jellybeansoup.github.io/ios-sherpa/blob/master/.github/workflows/documentation.yml) and hosted with [GitHub Pages](https://pages.github.com/).
 
-```
-pod Sherpa
-```
+To generate documentation locally, run `make documentation` or `sh ./scripts/documentation.sh` from the repo's root directory. The output will be generated in the docs folder, and should _not_ be included with commits (as the online documentation is automatically generated and updated).
 
 ## Get in Touch
 
