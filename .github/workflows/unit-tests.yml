@@ -1,0 +1,91 @@
+name: Unit Tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+
+    runs-on: macOS-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 0
+
+    - name: Install Sonar Scanner
+      run: brew install sonar-scanner
+  
+    - name: Run Tests
+      run: |
+        DEVELOPER_PATH=$(xcode-select --print-path)
+        PLATFORM=$(ls -1 "${DEVELOPER_PATH}/Platforms/iPhoneOS.platform/DeviceSupport/" | sort -gr | head -n 1)
+        DEVICE=$(xcrun simctl list devices "iOS ${PLATFORM}" | grep "iPhone" | head -n 1 | sed -Ee 's/^.*\(([A-Z0-9\-]+)\).*$/\1/g')
+
+        xcodebuild clean test \
+          -project "Sherpa.xcodeproj" \
+          -scheme "Sherpa" \
+        	-destination "platform=iOS Simulator,id=${DEVICE}" \
+          -enableCodeCoverage YES \
+          -derivedDataPath "${GITHUB_WORKSPACE}/DerivedData" \
+        	CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGN_IDENTITY=""
+
+    - name: Capture Results
+      if: always()
+      uses: actions/upload-artifact@v2
+      with:
+        name: Results
+        path: DerivedData/Logs/Test/*.xcresult
+        if-no-files-found: warn
+
+    - name: Merge Profile Data
+      run: |
+        PROFDATA_INPUT="${GITHUB_WORKSPACE}/DerivedData/Build/ProfileData/*/*.profdata"
+        PROFDATA_OUTPUT="${GITHUB_WORKSPACE}/merged.profdata"
+        xcrun llvm-profdata merge ${PROFDATA_INPUT[@]} -output "${PROFDATA_OUTPUT}"
+
+    - name: Prepare Coverage Report
+      run: |
+        PROFDATA_INPUT="${GITHUB_WORKSPACE}/merged.profdata"
+        COVERAGE_OUTPUT="${GITHUB_WORKSPACE}/merged.lcov"
+        BUNDLES="${GITHUB_WORKSPACE}/DerivedData/Build/Products/Debug-*/*"
+
+        for BUNDLE_PATH in ${BUNDLES}; do
+        	if [[ -e "${BUNDLE_PATH}/Info.plist" ]]; then
+        		PLIST_PATH="${BUNDLE_PATH}/Info.plist"
+        	elif [[ -e "${BUNDLE_PATH}/Resources/Info.plist" ]]; then
+        		PLIST_PATH="${BUNDLE_PATH}/Resources/Info.plist"
+        	else
+        		continue
+        	fi
+
+        	BINARY_NAME=$(/usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "${PLIST_PATH}")
+        	xcrun --run llvm-cov show "${BUNDLE_PATH}/${BINARY_NAME}" --instr-profile "${PROFDATA_INPUT}" >> "${COVERAGE_OUTPUT}"
+        done
+        
+    - name: Select Java Release
+      uses: actions/setup-java@v2
+      with:
+        distribution: "adopt"
+        java-version: "11"
+        
+    - name: SonarCloud
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: |
+        sonar-scanner \
+          -Dsonar.host.url=https://sonarcloud.io \
+        	-Dsonar.organization=jellybeansoup \
+        	-Dsonar.projectKey=jellybeansoup_ios-sherpa \
+        	-Dsonar.login=${SONAR_TOKEN} \
+        	-Dsonar.swift.coverage.reportPaths="${GITHUB_WORKSPACE}/merged.lcov" \
+          -Dsonar.cfamily.build-wrapper-output.bypass=true \
+          -Dsonar.c.file.suffixes=- \
+          -Dsonar.cpp.file.suffixes=- \
+          -Dsonar.objc.file.suffixes=-

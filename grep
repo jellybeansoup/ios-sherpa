@@ -1,0 +1,4 @@
+usage: xctrace list [devices|templates]
+
+description:
+	List capabilities of the current running environment, such as devices or templates
